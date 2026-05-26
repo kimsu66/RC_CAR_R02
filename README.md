@@ -33,10 +33,32 @@ RC_CAR_R02/
 ├── Core/
 │   ├── Inc/                    # 헤더 파일
 │   │   └── main.h
-│   └── Src/                    # 소스 파일
-│       ├── main.c              # 메인 애플리케이션 로직
-│       ├── stm32f4xx_hal_msp.c # HAL MSP 초기화
-│       └── stm32f4xx_it.c      # 인터럽트 핸들러
+│   └── Src/                        # 소스 및 헤더 파일
+│       │
+│       │  [사용자 구현 - 차량 제어]
+│       ├── main.c                  # 메인 루프: 센서 모니터링, UART 명령 처리, 자율주행 분기
+│       ├── car.c / car.h           # 차량 고수준 제어 API (전/후/좌/우/대각선, percent 기반)
+│       ├── direction.c / direction.h  # 모터 방향 GPIO 제어 (IN1~IN4)
+│       ├── speed.c / speed.h       # TIM2 PWM 듀티비 기반 속도 제어 (0~100%)
+│       ├── autodrive.c / autodrive.h  # 자율주행 로직: 초음파 3방향 기반 장애물 회피 상태머신
+│       │
+│       │  [사용자 구현 - 센서]
+│       ├── ultrasonic.c / ultrasonic.h  # HC-SR04 초음파 센서 3개(좌/중/우) 논블로킹 거리 측정
+│       ├── temp.c / temp.h         # NTC 온도센서 (ADC DMA, Beta 방정식, 50°C 경고 / 70°C 위험)
+│       ├── gas.c / gas.h           # MQ135 가스센서 (ADC DMA, ppm 근사 계산, SAFE/WARNING/DANGER)
+│       ├── ina219.c / ina219.h     # INA219 전류·전압 센서 (I2C3, 과전류 800mA 기준 감속)
+│       │
+│       │  [사용자 구현 - 기타]
+│       ├── ledbar.c / ledbar.h     # 74HC595 시프트 레지스터 기반 8비트 LED 바 제어
+│       ├── delay.c / delay.h       # TIM11 기반 마이크로초(µs) 딜레이
+│       │
+│       │  [CubeMX 자동 생성 - 주변장치 초기화]
+│       ├── adc.c / adc.h           # ADC1 초기화 (12비트, DMA, CH6=PA6 온도 / CH12=PC2 가스)
+│       ├── dma.c / dma.h           # DMA2 초기화 (ADC1 연속 전송)
+│       ├── gpio.c / gpio.h         # GPIO 초기화 (모터 방향 핀, 초음파 트리거 핀 등)
+│       ├── i2c.c / i2c.h           # I2C3 초기화 (100kHz, PA8=SCL / PB4=SDA)
+│       ├── tim.c / tim.h           # TIM 초기화 (TIM2=PWM, TIM3/4=IC, TIM11=µs 타이머)
+│       └── usart.c / usart.h       # USART1(9600bps 블루투스) / USART2(115200bps 디버그)
 ├── Drivers/
 │   ├── STM32F4xx_HAL_Driver/   # STM32 HAL 드라이버
 │   └── CMSIS/                  # ARM CMSIS 코어
